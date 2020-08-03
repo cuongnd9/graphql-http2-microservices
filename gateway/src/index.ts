@@ -1,3 +1,7 @@
+import { createServer } from 'http';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { execute, subscribe } from 'graphql';
+
 import express, { Express } from 'express';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
@@ -10,7 +14,7 @@ import { makeRemoteExecutableSchema, mergeSchemas } from 'graphql-tools';
 import { handleError, getSchema, relay, config } from './components';
 import { GraphqlController, SchemaController } from './controllers';
 
-const main = async () => {
+const createApp = async () => {
   const app: Express = express();
 
   app.use(helmet());
@@ -39,7 +43,25 @@ const main = async () => {
 
   app.use(handleError);
 
-  app.listen(config.port, () => console.log(`Server ready at http://127.0.0.1:${config.port}`));
+  return app;
 };
 
-main();
+const main = async () => {
+  const app = await createApp();
+  const server = createServer(app);
+
+  server.listen(config.port, () => {
+    console.log(`🚀 Server ready at http://127.0.0.1:${config.port}`);
+    console.log(`🚀 Subscriptions ready at ws://127.0.0.1:${config.port}`);
+    new SubscriptionServer({
+      execute,
+      subscribe,
+      schema: app.locals.schema,
+    }, {
+      server,
+      path: '/',
+    });
+  });
+};
+
+main().catch((error) => console.log('Global error', error));

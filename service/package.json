@@ -30,6 +30,7 @@
     "diana-js": "^0.6.0",
     "graphql": "^15.0.0",
     "graphql-scalars": "^1.1.2",
+    "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^4.0.7",
     "grpc-graphql-sdk": "^0.1.2",
     "hera-js": "^0.2.0",

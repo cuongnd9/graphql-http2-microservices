@@ -38,6 +38,7 @@
     "lodash": "^4.17.15",
     "serialize-javascript": "^4.0.0",
     "serializr": "^2.0.3",
+    "subscriptions-transport-ws": "^0.9.17",
     "surrial": "^2.0.2",
     "zeebe-node": "^0.23.0-alpha.4"
   },

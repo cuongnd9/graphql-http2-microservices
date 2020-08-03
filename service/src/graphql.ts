@@ -1,5 +1,6 @@
 import { graphql } from 'graphql';
 import { makeExecutableSchema } from 'graphql-tools';
+import { PubSub } from 'graphql-subscriptions';
 
 import typeDefs from './typeDefs';
 import resolvers from './resolvers';
@@ -15,7 +16,15 @@ const formatVariables = (variables: any[]) => {
 const callGraphql = async (req: any, callback: Function) => {
   try {
     const schema = makeExecutableSchema({ typeDefs, resolvers });
-    const result = await graphql(schema, req.query, resolvers, {}, formatVariables(JSON.parse(req.variables  || '[]')));
+    const result = await graphql(
+      schema,
+      req.query,
+      resolvers,
+      {
+        pubsub: new PubSub(),
+      },
+      formatVariables(JSON.parse(req.variables  || '[]'))
+    );
     if (result.errors) {
       return handleError(null, result.errors[0], callback);
     }

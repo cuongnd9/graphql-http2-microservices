@@ -1,3 +1,3 @@
-# file-upload-graphql-microservices
+# graphql-http2-microservices
 
-File Upload with GraphQL (microservices) from a React Application
+microservices + graphql + http2 (grpc)

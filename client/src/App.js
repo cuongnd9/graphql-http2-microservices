@@ -4,18 +4,22 @@ import { Query } from 'react-apollo';
 
 const GET_MESSAGES = gql`
   query {
-    messages {
+    chats {
       id
       content
+      from
+      createdAt
     }
   }
 `;
 
 const MESSAGE_CREATED = gql`
   subscription {
-    messageCreated {
+    messageSent {
       id
       content
+      from
+      createdAt
     }
   }
 `;
@@ -33,7 +37,7 @@ const App = () => (
 
       return (
         <Messages
-          messages={data.messages}
+          messages={data.chats}
           subscribeToMore={subscribeToMore}
         />
       );
@@ -51,7 +55,7 @@ class Messages extends React.Component {
         return {
           messages: [
             ...prev.messages,
-            subscriptionData.data.messageCreated,
+            subscriptionData.data.messageSent,
           ],
         };
       },

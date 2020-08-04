@@ -3,6 +3,7 @@ export default {
   services: {
     orderService: {
       url: '127.0.0.1:50009',
+      subscriptionUrl: '127.0.0.1:60009',
     },
   },
   apiKey: {

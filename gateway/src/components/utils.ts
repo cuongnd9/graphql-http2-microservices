@@ -1,3 +1,8 @@
+import ws from 'ws';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
+import { WebSocketLink } from 'apollo-link-ws';
+import { getMainDefinition } from 'apollo-utilities';
+
 import { Request, Response, NextFunction } from 'express';
 import { server, credentials } from 'grpc-graphql-sdk';
 import { get } from 'lodash';
@@ -31,7 +36,7 @@ const streamToString = (stream: ReadStream): Promise<any[]> => {
 };
 
 const formatVariables = (variables: any) => {
-  return !variables ? {} :  Promise.all(Object.keys(variables).map(async (key: any) => ({
+  return !variables ? {} : Promise.all(Object.keys(variables).map(async (key: any) => ({
     key,
     value: !Array.isArray(variables[key]) ? {
       ...variables[key].file,
@@ -44,6 +49,26 @@ const formatVariables = (variables: any) => {
 }
 
 export const relay = (url: string) => (operation: Operation) => new Promise<ExecutionResult>(async (resolve, reject) => {
+  console.log('----------------start-------------------')
+  const definition = getMainDefinition(operation.query);
+  if (definition.kind === 'OperationDefinition' && definition.operation === 'subscription') {
+    console.log('-------tada-------------')
+    const client = new SubscriptionClient('127.0.0.1:60009', { reconnect: true }, ws);
+    const executionResult = await client.request(operation);
+    const error = get(executionResult, 'error');
+    if (error) {
+      const parsedError = JSON.parse(error);
+      const extensions = get(parsedError, 'extensions');
+      const message = get(parsedError, 'message');
+      const locations = get(parsedError, 'locations');
+      return reject(new ParserError(message, extensions, locations));
+    }
+    const data = get(executionResult, 'data');
+    if (!data) {
+      return reject(new ServiceError(`${url} is not found`));
+    }
+    resolve({ data: JSON.parse(data) });
+  }
   const client = new server(url, credentials.createInsecure(), {
     'grpc.max_receive_message_length': 1024 * 1024 * 100,
     'grpc.max_send_message_length': 1024 * 1024 * 100,

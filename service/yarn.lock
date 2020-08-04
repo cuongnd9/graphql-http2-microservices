@@ -3396,18 +3396,28 @@ graphql@^15.0.0:
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.0.0.tgz#042a5eb5e2506a2e2111ce41eb446a8e570b8be9"
   integrity sha512-ZyVO1xIF9F+4cxfkdhOJINM+51B06Friuv4M66W7HzUOeFd+vNzUn4vtswYINPi6sysjf1M2Ri/rwZALqgwbaQ==
 
+graphql@^15.3.0:
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.3.0.tgz#3ad2b0caab0d110e3be4a5a9b2aa281e362b5278"
+  integrity sha512-GTCJtzJmkFLWRfFJuoo9RWWa/FfamUHgiFosxi/X1Ani4AVWbeyBenZTNX6dM+7WSbbFfTo/25eh0LLkwHMw2w==
+
 growl@1.10.5:
   version "1.10.5"
   resolved "https://registry.yarnpkg.com/growl/-/growl-1.10.5.tgz#f2735dc2283674fa67478b10181059355c369e5e"
   integrity sha512-qBr4OuELkhPenW6goKVXiv47US3clb3/IbuWF9KNKEijAy9oeHxU9IgzjvJhHkUzhaj7rOUD7+YGWqUjLp5oSA==
 
-grpc-graphql-sdk@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/grpc-graphql-sdk/-/grpc-graphql-sdk-0.1.2.tgz#a6e92952fb1445b20924c933fe9d0a22e9905796"
-  integrity sha512-OT5Eb0thDz/YLEktkHuqVP1Vd3DpmdXe4a4VGQ9x3v0rHJdF9vdeceVAJ54tRvxyAt00wDeSMNR97Qb7HXry+g==
+grpc-graphql-sdk@^0.2.4:
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/grpc-graphql-sdk/-/grpc-graphql-sdk-0.2.5.tgz#8434cc83ace8aaba303383bce667b436b4bd2f85"
+  integrity sha512-i9tuk9OLSw4YZEMcekA0AAZBnQdwxV2kYmGka/r2CsqopBGoPPdLazPUvjzAGB0RG3s+jOORRcQMawt07TX2+Q==
   dependencies:
     "@grpc/proto-loader" "^0.5.4"
+    diana-js "^0.6.0"
+    graphql "^15.3.0"
     grpc "^1.24.2"
+    hera-js "^0.2.0"
+    juno-js "^0.0.3"
+    subscriptions-transport-ws "^0.9.17"
 
 grpc@^1.24.2:
   version "1.24.3"
@@ -6610,7 +6620,7 @@ strip-json-comments@^3.0.1:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.0.1.tgz#85713975a91fb87bf1b305cca77395e40d2a64a7"
   integrity sha512-VTyMAUfdm047mwKl+u79WIdrZxtFtn+nBxHeb844XBQ9uMNTuTHdx2hc5RiAJYqwTj3wc/xe5HLSdJSkJ+WfZw==
 
-subscriptions-transport-ws@^0.9.11, subscriptions-transport-ws@^0.9.16:
+subscriptions-transport-ws@^0.9.11, subscriptions-transport-ws@^0.9.16, subscriptions-transport-ws@^0.9.17:
   version "0.9.17"
   resolved "https://registry.yarnpkg.com/subscriptions-transport-ws/-/subscriptions-transport-ws-0.9.17.tgz#e30e40f0caae0d2781903c01a8cb51b6e2682098"
   integrity sha512-hNHi2N80PBz4T0V0QhnnsMGvG3XDFDS9mS6BhZ3R12T6EBywC8d/uJscsga0cVO4DKtXCkCRrWm2sOYrbOdhEA==

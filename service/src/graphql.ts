@@ -34,4 +34,7 @@ const callGraphql = async (req: any, callback: Function) => {
   }
 };
 
+const schema = makeExecutableSchema({ typeDefs, resolvers });
+
+export { schema };
 export default callGraphql;

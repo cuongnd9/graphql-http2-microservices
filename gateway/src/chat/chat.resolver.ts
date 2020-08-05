@@ -1,7 +1,7 @@
 import { PubSub } from 'graphql-subscriptions';
 
 const pubsub = new PubSub();
-const CHAT_CHANNEL = 'ABC_XYZ';
+const CHAT_CHANNEL = 'ABC_XYZ2';
 let chats = [
   {
     id: '1', from: 'admin', content: 'testing 1', createdAt: '',
@@ -19,11 +19,11 @@ let chats = [
 
 const resolver = {
   Query: {
-    chats: () => chats,
+    chats2: () => chats,
   },
 
   Mutation: {
-    createChat: (_: any, { content, from }: any) => {
+    createChat2: (_: any, { content, from }: any) => {
       const id = `_${
         Math.random()
           .toString(36)
@@ -37,14 +37,14 @@ const resolver = {
 
       chats = [chat, ...chats];
       chats = chats.splice(0, 8);
-      pubsub.publish(CHAT_CHANNEL, { messageSent: chat });
+      pubsub.publish(CHAT_CHANNEL, { messageSent2: chat });
 
       return chat;
     },
   },
 
   Subscription: {
-    messageSent: {
+    messageSent2: {
       subscribe: () => pubsub.asyncIterator(CHAT_CHANNEL),
     },
   },

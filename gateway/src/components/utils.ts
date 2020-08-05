@@ -2,11 +2,11 @@ import ws from 'ws';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
-
+import { observableToAsyncIterable } from 'graphql-tools';
 import { Request, Response, NextFunction } from 'express';
 import { server, credentials } from 'grpc-graphql-sdk';
 import { get } from 'lodash';
-import { GraphQLSchema, DocumentNode, ExecutionResult } from 'graphql';
+import {GraphQLSchema, DocumentNode, ExecutionResult, GraphQLResolveInfo} from 'graphql';
 import crypto from 'crypto';
 import { ReadStream, writeFileSync } from 'fs';
 
@@ -14,16 +14,11 @@ import {
   AppError, ServiceError, ParserError, AuthenticationError,
 } from './errors';
 
-type Operation = {
-  query: DocumentNode;
-  operationName?: string;
-  variables?: any;
-  context?: {
-    graphqlContext?: {
-      req?: any;
-      res?: any;
-    };
-  };
+interface ExecutionParams<TArgs = Record<string, any>, TContext = any> {
+  document: DocumentNode;
+  variables?: TArgs;
+  context?: TContext;
+  info?: GraphQLResolveInfo;
 }
 
 const streamToString = (stream: ReadStream): Promise<any[]> => {
@@ -48,33 +43,12 @@ const formatVariables = (variables: any) => {
   })));
 }
 
-export const relay = (url: string) => (operation: Operation) => new Promise<ExecutionResult>(async (resolve, reject) => {
-  console.log('----------------start-------------------')
-  const definition = getMainDefinition(operation.query);
-  if (definition.kind === 'OperationDefinition' && definition.operation === 'subscription') {
-    console.log('-------tada-------------')
-    const client = new SubscriptionClient('127.0.0.1:60009', { reconnect: true }, ws);
-    const executionResult = await client.request(operation);
-    const error = get(executionResult, 'error');
-    if (error) {
-      const parsedError = JSON.parse(error);
-      const extensions = get(parsedError, 'extensions');
-      const message = get(parsedError, 'message');
-      const locations = get(parsedError, 'locations');
-      return reject(new ParserError(message, extensions, locations));
-    }
-    const data = get(executionResult, 'data');
-    if (!data) {
-      return reject(new ServiceError(`${url} is not found`));
-    }
-    resolve({ data: JSON.parse(data) });
-  }
+export const executor = (url: string) => async (params: ExecutionParams) => new Promise<ExecutionResult<any>>(async (resolve, reject) => {
   const client = new server(url, credentials.createInsecure(), {
     'grpc.max_receive_message_length': 1024 * 1024 * 100,
     'grpc.max_send_message_length': 1024 * 1024 * 100,
   });
-  const graphqlContext = get(operation, 'context.graphqlContext');
-  const req = get(graphqlContext, 'req');
+  const req = get(params, 'context.req');
   client.callRequest({
     headers: JSON.stringify(req.headers),
     query: req.body.query,
@@ -95,6 +69,20 @@ export const relay = (url: string) => (operation: Operation) => new Promise<Exec
     resolve({ data: JSON.parse(data) });
   });
 });
+
+export const subscriber = (url: string) => async (params: ExecutionParams): Promise<AsyncIterator<ExecutionResult<any>> | ExecutionResult<any>> => {
+  const subscriptionClient = new SubscriptionClient(url, {
+    reconnect: true,
+  }, ws);
+  const { document, variables, context } = params;
+  return observableToAsyncIterable(
+    subscriptionClient.request({
+      query: document,
+      variables,
+      context,
+    })
+  );
+}
 
 export const getSchema = (url: string) => new Promise<GraphQLSchema>((resolve, reject) => {
   const client = new server(url, credentials.createInsecure());

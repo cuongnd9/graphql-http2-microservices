@@ -1,17 +1,19 @@
 import { createServer } from 'http';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
-import { execute, subscribe } from 'graphql';
+import { execute, subscribe, GraphQLSchema } from 'graphql';
 
 import express, { Express } from 'express';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
-import { GraphQLSchema } from 'graphql';
 import expressPlayground from 'graphql-playground-middleware-express';
 import { graphqlUploadExpress } from 'graphql-upload';
 import cors from 'cors';
+import { schema } from './chat';
 
 import { makeRemoteExecutableSchema, mergeSchemas } from 'graphql-tools';
-import { handleError, getSchema, relay, config } from './components';
+import {
+  handleError, getSchema, executor, subscriber, config,
+} from './components';
 import { GraphqlController, SchemaController } from './controllers';
 
 const createApp = async () => {
@@ -24,12 +26,13 @@ const createApp = async () => {
   app.use(express.urlencoded({ extended: false }));
 
   const schemas: GraphQLSchema[] = await Promise.all(
-    Object.values(config.services).map(async service => makeRemoteExecutableSchema({
+    Object.values(config.services).map(async (service) => makeRemoteExecutableSchema({
       schema: await getSchema(service.url),
-      fetcher: await relay(service.url),
+      executor: await executor(service.url),
+      subscriber: subscriber(service.subscriptionUrl),
     }))
   );
-  app.locals.schema = mergeSchemas({ schemas });
+  app.locals.schema = mergeSchemas({ schemas: [...schemas, schema] });
 
   const graphqlController = new GraphqlController();
   const schemaController = new SchemaController();
@@ -53,7 +56,7 @@ const main = async () => {
   server.listen(config.port, () => {
     console.log(`🚀 Server ready at http://127.0.0.1:${config.port}`);
     console.log(`🚀 Subscriptions ready at ws://127.0.0.1:${config.port}`);
-    new SubscriptionServer({
+    SubscriptionServer.create({
       execute,
       subscribe,
       schema: app.locals.schema,
